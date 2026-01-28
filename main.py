@@ -15,13 +15,16 @@ def main():
     print("Hello from gemini-agent!")
     parser = argparse.ArgumentParser(description='Chatbot')
     parser.add_argument("user_prompt", type=str, help="User prompt")
+    parser.add_argument("--verbose", action='store_true',help='Enable verbose output')
     args = parser.parse_args()
     user_prompt = args.user_prompt
-    response = client.models.generate_content(model=model, contents=user_prompt)
+    messages = [genai.types.Content(role="user", parts=[genai.types.Part(text=user_prompt)])]
+    response = client.models.generate_content(model=model, contents=messages)
     metadata = response.usage_metadata
-    print(f"User prompt: {user_prompt}")
-    print(f"Prompt tokens: {metadata.prompt_token_count}")
-    print(f"Response tokens: {metadata.candidates_token_count}")
+    if args.verbose:
+        print(f"User prompt: {user_prompt}")
+        print(f"Prompt tokens: {metadata.prompt_token_count}")
+        print(f"Response tokens: {metadata.candidates_token_count}")
     print(f"Response:")  
     print(response.text)
 
