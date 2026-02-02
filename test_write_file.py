@@ -1,4 +1,4 @@
-from functions.write_file import *
+from functions.write_file import write_file
 
 
 def test():
@@ -14,9 +14,3 @@ def test():
 
 if __name__ == "__main__":
     test()
-
-
-
-    
-    
-    
