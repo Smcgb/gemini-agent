@@ -8,4 +8,18 @@ wheels/
 
 # Virtual environments
 .venv
+
 .env
+
+# IDE files
+.idea/
+.vscode/
+
+# Other files
+*.log
+*.tmp
+*.swp
+
+# Scratch files
+scratch.py
+*.ipynb
