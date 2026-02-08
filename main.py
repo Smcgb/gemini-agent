@@ -7,24 +7,29 @@ from google import genai
 from call_functions import available_functions, call_function
 from prompts import system_prompt
 
-load_dotenv()
-api_key = os.environ.get("GEMINI_API_KEY")
-if api_key is None:
-    raise RuntimeError("No API Key Found")
 
-client = genai.Client(
-    api_key=api_key,
-)
-model = "gemini-2.5-flash"
+def create_client() -> genai.Client:
+    load_dotenv()
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key is None:
+        raise RuntimeError("No API Key Found")
+    client = genai.Client(
+        api_key=api_key,
+    )
+    return client
 
 
 def main():
     print("Hello from gemini-agent!")
+
     parser = argparse.ArgumentParser(description="Chatbot")
     parser.add_argument("user_prompt", type=str, help="User prompt")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     args = parser.parse_args()
-    user_prompt = args.user_prompt
+
+    client = create_client()
+    model = "gemini-2.5-flash"
+
     messages = [
         genai.types.Content(role="user", parts=[genai.types.Part(text=user_prompt)])
     ]
