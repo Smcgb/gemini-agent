@@ -1,5 +1,4 @@
 from google import genai
-from google.genai.types import FunctionCall
 
 from functions.get_file_content import get_file_content, schema_get_file_content
 from functions.get_files_info import get_files_info, schema_get_files_info
@@ -23,7 +22,7 @@ function_map = {
 }
 
 
-def call_function(function_call: genai.FunctionCall, verbose=False):
+def call_function(function_call: genai.types.FunctionCall, verbose=False):
 
     if verbose:
         print(f" - Calling function: {function_call.name}({function_call.args})")
