@@ -19,6 +19,32 @@ def create_client() -> genai.Client:
     return client
 
 
+def handle_function_calls(response, verbose: bool):
+    function_results = []
+
+    for f in response.function_calls:
+        function_call_result = call_function(f, verbose=verbose)
+
+        if not function_call_result.parts:
+            raise Exception(f"Function call failed for {f.name}({f.args})")
+
+        part = function_call_result.parts[0]
+        func_resp = part.function_response
+
+        if func_resp is None:
+            raise Exception(f"Function call failed for {f.name}({f.args})")
+
+        if func_resp.response is None:
+            raise Exception(f"Function call failed for {f.name}({f.args})")
+
+        function_results.append(part)
+
+        if verbose:
+            print(f"-> {func_resp.response}")
+
+    return function_results
+
+
 def main():
     print("Hello from gemini-agent!")
 
@@ -30,6 +56,7 @@ def main():
     client = create_client()
     model = "gemini-2.5-flash"
 
+    user_prompt = args.user_prompt
     messages = [
         genai.types.Content(role="user", parts=[genai.types.Part(text=user_prompt)])
     ]
@@ -49,19 +76,7 @@ def main():
         print(f"Response tokens: {metadata.candidates_token_count}")
 
     if response.function_calls:
-        function_results = []
-        for f in response.function_calls:
-            function_call_result = call_function(f, verbose=args.verbose)
-            if not function_call_result.parts:
-                raise Exception(f"Function call failed for {f.name}({f.args})")
-            if not function_call_result.parts[0].function_response.response:
-                raise Exception(f"Function call failed for {f.name}({f.args})")
-            print(f"-> {function_call_result.parts[0].function_response.response}")
-
-            function_results.append(function_call_result.parts[0])
-
-            if args.verbose:
-                print(f"-> {function_call_result.parts[0].function_response.response}")
+        function_results = handle_function_calls(response, verbose=args.verbose)
     else:
         print("Response:")
         print(response.text)
