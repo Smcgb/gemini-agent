@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from dotenv import load_dotenv
 from google import genai
@@ -60,26 +61,39 @@ def main():
     messages = [
         genai.types.Content(role="user", parts=[genai.types.Part(text=user_prompt)])
     ]
-    response = client.models.generate_content(
-        model=model,
-        contents=messages,
-        config=genai.types.GenerateContentConfig(
-            system_instruction=system_prompt,
-            tools=[available_functions],
-        ),
-    )
 
-    metadata = response.usage_metadata
-    if args.verbose:
-        print(f"User prompt: {user_prompt}")
-        print(f"Prompt tokens: {metadata.prompt_token_count}")
-        print(f"Response tokens: {metadata.candidates_token_count}")
+    for i in range(20):
+        response = client.models.generate_content(
+            model=model,
+            contents=messages,
+            config=genai.types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                tools=[available_functions],
+            ),
+        )
 
-    if response.function_calls:
-        function_results = handle_function_calls(response, verbose=args.verbose)
-    else:
-        print("Response:")
-        print(response.text)
+        if response.candidates:
+            for c in response.candidates:
+                messages.append(c.content)
+
+        metadata = response.usage_metadata
+        if args.verbose:
+            print(f"User prompt: {user_prompt}")
+            print(f"Prompt tokens: {metadata.prompt_token_count}")
+            print(f"Response tokens: {metadata.candidates_token_count}")
+
+        if response.function_calls:
+            function_results = handle_function_calls(response, verbose=args.verbose)
+            messages.append(
+                genai.types.Content(role="user", parts=function_results)
+            )  # messages.append(types.Content(role="user", parts=function_responses))?
+        else:
+            print("Response:")
+            print(response.text)
+            return
+
+    print("Maximum iterations reached, no response received")
+    sys.exit(1)
 
 
 if __name__ == "__main__":

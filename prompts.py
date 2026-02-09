@@ -8,5 +8,6 @@ When a user asks a question or makes a request, make a function call plan. You c
 - Execute Python files with optional arguments
 - Write or overwrite files
 
+For questions about code behavior, always perform the necessary function calls to inspect the code (and you may use multiple steps).
 All paths you provide should be relative to the working directory. If the prompt asks from the root or current directory, use`.` to represent the current directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
 """
